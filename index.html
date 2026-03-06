@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Sagar Store</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f2f2f2;
+}
+
+header{
+background:#131921;
+color:white;
+padding:15px;
+text-align:center;
+font-size:28px;
+font-weight:bold;
+}
+
+.banner{
+width:100%;
+height:200px;
+background:url("https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg");
+background-size:cover;
+background-position:center;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+font-size:30px;
+font-weight:bold;
+}
+
+.cod{
+background:#28a745;
+color:white;
+padding:8px;
+text-align:center;
+font-weight:bold;
+}
+
+.searchBar{
+padding:10px;
+text-align:center;
+}
+
+.searchBar input{
+width:80%;
+padding:10px;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:20px;
+padding:20px;
+}
+
+.card{
+background:white;
+border-radius:10px;
+padding:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.2);
+text-align:center;
+position:relative;
+}
+
+.discount{
+position:absolute;
+top:5px;
+left:5px;
+background:red;
+color:white;
+padding:3px 6px;
+font-size:12px;
+border-radius:5px;
+}
+
+.card img{
+width:100%;
+height:150px;
+object-fit:cover;
+border-radius:8px;
+}
+
+.oldPrice{
+text-decoration:line-through;
+color:gray;
+font-size:13px;
+}
+
+button{
+background:#ff9900;
+border:none;
+padding:8px 12px;
+border-radius:5px;
+cursor:pointer;
+margin-top:5px;
+}
+
+.cart{
+background:white;
+margin:20px;
+padding:20px;
+border-radius:10px;
+}
+
+.remove{
+background:red;
+color:white;
+margin-left:10px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:5px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+🛒 SAGAR STORE
+</header>
+
+<div class="banner">
+Mega Shopping Sale
+</div>
+
+<div class="cod">
+🚚 Cash On Delivery Available
+</div>
+
+<div class="searchBar">
+<input id="search" placeholder="Search products..." onkeyup="searchProducts()">
+</div>
+
+<div class="products" id="productList"></div>
+
+<div class="cart">
+
+<h3>Cart</h3>
+
+<ul id="cartItems"></ul>
+
+<h4>Total ₹<span id="total">0</span></h4>
+
+<h3>Customer Details</h3>
+
+<input id="name" placeholder="Name">
+<input id="phone" placeholder="Phone">
+<input id="address" placeholder="Address">
+
+<button onclick="sendOrder()">Order on WhatsApp</button>
+
+</div>
+
+<script>
+
+const fallback="https://picsum.photos/300"
+
+const products=[
+
+{name:"Smart Watch",price:999,old:4999,discount:"80% OFF",img:"https://images.pexels.com/photos/437037/pexels-photo-437037.jpeg"},
+{name:"Bluetooth Speaker",price:599,old:2999,discount:"80% OFF",img:"https://images.pexels.com/photos/3394656/pexels-photo-3394656.jpeg"},
+{name:"Headphones",price:799,old:3200,discount:"75% OFF",img:"https://images.pexels.com/photos/1649771/pexels-photo-1649771.jpeg"},
+{name:"Laptop",price:45000,old:90000,discount:"50% OFF",img:"https://images.pexels.com/photos/18105/pexels-photo.jpg"},
+{name:"Gaming Mouse",price:499,old:1999,discount:"75% OFF",img:"https://images.pexels.com/photos/2115257/pexels-photo-2115257.jpeg"},
+{name:"Keyboard",price:699,old:2500,discount:"70% OFF",img:"https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg"},
+{name:"Camera",price:25000,old:100000,discount:"75% OFF",img:"https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg"},
+{name:"Shoes",price:1999,old:6000,discount:"70% OFF",img:"https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg"},
+{name:"Backpack",price:899,old:3500,discount:"75% OFF",img:"https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg"},
+{name:"Sunglasses",price:499,old:2000,discount:"75% OFF",img:"https://images.pexels.com/photos/46710/pexels-photo-46710.jpeg"}
+
+]
+
+let cart={}
+
+function displayProducts(list){
+
+let html=""
+
+list.forEach((p)=>{
+
+html+=`
+
+<div class="card">
+
+<div class="discount">${p.discount}</div>
+
+<img src="${p.img}" loading="lazy" onerror="this.src='${fallback}'">
+
+<h4>${p.name}</h4>
+
+<div class="oldPrice">₹${p.old}</div>
+<p>₹${p.price}</p>
+
+<button onclick="addToCart('${p.name}')">Add to Cart</button>
+
+</div>
+
+`
+
+})
+
+document.getElementById("productList").innerHTML=html
+
+}
+
+function addToCart(name){
+
+let p=products.find(x=>x.name===name)
+
+if(cart[name]){
+cart[name].qty++
+}else{
+cart[name]={...p,qty:1}
+}
+
+updateCart()
+
+}
+
+function updateCart(){
+
+let html=""
+let total=0
+
+for(let key in cart){
+
+let item=cart[key]
+
+total+=item.price*item.qty
+
+html+=`<li>${item.name} x${item.qty} - ₹${item.price*item.qty}
+<button class="remove" onclick="removeItem('${key}')">X</button></li>`
+
+}
+
+document.getElementById("cartItems").innerHTML=html
+document.getElementById("total").innerText=total
+
+}
+
+function removeItem(name){
+delete cart[name]
+updateCart()
+}
+
+function searchProducts(){
+
+let text=document.getElementById("search").value.toLowerCase()
+
+if(text===""){
+displayProducts(products)
+return
+}
+
+let filtered=products.filter(p=>p.name.toLowerCase().includes(text))
+
+displayProducts(filtered)
+
+}
+
+function sendOrder(){
+
+if(Object.keys(cart).length===0){
+alert("Cart is empty")
+return
+}
+
+let name=document.getElementById("name").value.trim()
+let phone=document.getElementById("phone").value.trim()
+let address=document.getElementById("address").value.trim()
+
+if(name==""||phone==""||address==""){
+alert("Please fill all details")
+return
+}
+
+if(phone.length<10){
+alert("Enter valid phone number")
+return
+}
+
+let items=""
+
+for(let key in cart){
+let item=cart[key]
+items+=`${item.name} x${item.qty}, `
+}
+
+let total=document.getElementById("total").innerText
+
+let msg=`New Order
+Name: ${name}
+Phone: ${phone}
+Address: ${address}
+Items: ${items}
+Total: ₹${total}`
+
+let url="https://wa.me/919001837113?text="+encodeURIComponent(msg)
+
+window.open(url)
+
+}
+
+displayProducts(products)
+
+</script>
+
+</body>
+</html>
